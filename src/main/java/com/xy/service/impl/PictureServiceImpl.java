@@ -1,9 +1,9 @@
 package com.xy.service.impl;
 
-import com.xy.dao.ClassifyMapper;
 import com.xy.dao.PictureMapper;
 import com.xy.pojo.Classify;
 import com.xy.pojo.Picture;
+import com.xy.service.ClassifyService;
 import com.xy.service.PictureService;
 import com.xy.utils.ClassifyUtil;
 import net.coobird.thumbnailator.Thumbnails;
@@ -28,7 +28,7 @@ public class PictureServiceImpl implements PictureService {
     @Autowired
     private PictureMapper pictureMapper;
     @Autowired
-    private ClassifyMapper classifyMapper;
+    private ClassifyService classifyService;
 
     @Override
     public List<Picture> getPictureByUserKey(int userKey) {
@@ -74,14 +74,16 @@ public class PictureServiceImpl implements PictureService {
 
                 try {
                     file.transferTo(new File(folder, Objects.requireNonNull(name)));
-                    Thumbnails.of(path + name).scale(1F).outputQuality(0.3F).toFile(thumbPath + name);
+
+                    Thumbnails.of(new File(path + name)).scale(1F).outputQuality(0.3F).toFile(new File(thumbPath + name));
 
                     String classify = ClassifyUtil.getClassify(thumbUrl + name);
-                    int classifyKey = classifyMapper.queryClassifyKey(classify);
 
-                    if (classifyKey == -1) {
+                    int classifyKey = classifyService.queryClassifyKey(classify);
+
+                    if (classifyKey == 0) {
                         classifyKey = (int) (Math.random() * (999999 - 100000) + 100000);
-                        classifyMapper.addClassify(new Classify(classifyKey, classify));
+                        classifyService.addClassify(new Classify(classifyKey, classify));
                     }
 
                     map.put("name", name);
@@ -95,6 +97,8 @@ public class PictureServiceImpl implements PictureService {
                     results.put(oldName, pictureMapper.addPicture(map));
                 } catch (Exception e) {
                     results.put(oldName, -1);
+                } finally {
+                    countDownLatch.countDown();
                 }
             };
 
@@ -113,7 +117,7 @@ public class PictureServiceImpl implements PictureService {
     }
 
     @Override
-    public Map<String, Integer> deletePicture(List<String> pictureNames, int userKey) {
+    public Map<String, Integer> deletePicture(String[] pictureNames, int userKey) {
         Map<String, Integer> map = new HashMap<>();
 
         for (String name : pictureNames) {

@@ -47,7 +47,7 @@ public interface PictureService {
      * @param userKey 用户主键
      * @return 是否删除
      */
-    Map<String, Integer> deletePicture(List<String> pictureName, int userKey);
+    Map<String, Integer> deletePicture(String[] pictureName, int userKey);
 
     /**
      * 查询所查照片名是否存在

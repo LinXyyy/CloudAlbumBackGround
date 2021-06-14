@@ -1,6 +1,7 @@
 package com.xy.dao;
 
 import com.xy.pojo.Classify;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * @author x1yyy
@@ -19,5 +20,5 @@ public interface ClassifyMapper {
      * @param classify 分类
      * @return key
      */
-    int queryClassifyKey(String classify);
+    int queryClassifyKey(@Param("classify") String classify);
 }

@@ -4,8 +4,7 @@ import com.xy.pojo.Picture;
 import com.xy.service.PictureService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -23,35 +22,30 @@ public class PictureController {
 
     @ResponseBody
     @RequestMapping("/getPictureByUserKey")
-    public List<Picture> getPictureByUserKey(HttpServletRequest request) {
-        int userKey = Integer.parseInt(request.getHeader("userKey"));
-        return pictureService.getPictureByUserKey(userKey);
+    public List<Picture> getPictureByUserKey(@RequestHeader String userKey) {
+        return pictureService.getPictureByUserKey(Integer.parseInt(userKey));
     }
 
     @ResponseBody
     @RequestMapping("/getPictureByUserKeyAndClassify")
-    public List<Picture> getPictureByUserKeyAndClassify(String classifyKey, HttpServletRequest request) {
-        int userKey = Integer.parseInt(request.getHeader("userKey"));
-        return pictureService.getPictureByUserKeyAndClassify(userKey, Integer.parseInt(classifyKey));
+    public List<Picture> getPictureByUserKeyAndClassify(String classifyKey, @RequestHeader String userKey) {
+        return pictureService.getPictureByUserKeyAndClassify(Integer.parseInt(userKey), Integer.parseInt(classifyKey));
     }
 
     @ResponseBody
     @RequestMapping("/addPicture")
     public Map<String, Integer> addPicture(MultipartFile[] img, HttpServletRequest request) {
         int userKey = Integer.parseInt(request.getHeader("userKey"));
+
         String imgUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + "/image/"+ userKey + "/";
         String thumbUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + "/image/"+ userKey + "/thumb/";
-
-        System.out.println(imgUrl);
 
         return pictureService.addPicture(img, userKey, imgUrl, thumbUrl);
     }
 
     @ResponseBody
     @RequestMapping("/deletePicture")
-    public Map<String, Integer> deletePicture(List<String> pictureNames, HttpServletRequest request) {
-        int userKey = Integer.parseInt(request.getHeader("userKey"));
-
-        return pictureService.deletePicture(pictureNames, userKey);
+    public Map<String, Integer> deletePicture(String[] pictureNames, @RequestHeader String userKey) {
+        return pictureService.deletePicture(pictureNames, Integer.parseInt(userKey));
     }
 }

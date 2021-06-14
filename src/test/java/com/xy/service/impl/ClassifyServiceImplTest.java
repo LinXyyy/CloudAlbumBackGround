@@ -12,13 +12,13 @@ public class ClassifyServiceImplTest extends TestCase {
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("applicationContext.xml");
         ClassifyService classifyService = applicationContext.getBean("classifyServiceImpl", ClassifyService.class);
 
-        System.out.println(classifyService.addClassify(new Classify(4, "4")));
+        System.out.println(classifyService.addClassify(new Classify(111, "111")));
     }
 
     public void testQueryClassifyKey() {
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("applicationContext.xml");
         ClassifyService classifyService = applicationContext.getBean("classifyServiceImpl", ClassifyService.class);
 
-        System.out.println(classifyService.queryClassifyKey("3"));
+        System.out.println(classifyService.queryClassifyKey("人"));
     }
 }

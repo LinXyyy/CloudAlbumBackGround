@@ -26,6 +26,8 @@
         select name
         from picture
         where name like #{ checkName } and userKey = #{ userKey }
+        order by pictureKey DESC
+        limit 1
     </select>
 
     <select id="getPictureByUserKey" resultMap="pictureInClassify">

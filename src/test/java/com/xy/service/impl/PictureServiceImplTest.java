@@ -1,7 +1,10 @@
 package com.xy.service.impl;
 
+import com.xy.dao.ClassifyMapper;
+import com.xy.pojo.Classify;
 import com.xy.pojo.Picture;
 import com.xy.service.PictureService;
+import com.xy.utils.ClassifyUtil;
 import junit.framework.TestCase;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -29,16 +32,25 @@ public class PictureServiceImplTest extends TestCase {
     public void testAddPictures() {
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("applicationContext.xml");
         PictureService pictureService = applicationContext.getBean("pictureServiceImpl", PictureService.class);
+        ClassifyMapper classifyMapper = applicationContext.getBean("classifyMapper", ClassifyMapper.class);
+
+
+        String classify = ClassifyUtil.getClassify("http://49.234.149.121:8080/image/762736/thumb/DetectLabel1.jpg");
+        int classifyKey = classifyMapper.queryClassifyKey(classify);
+
+        if (classifyKey == -1) {
+            classifyKey = (int) (Math.random() * (999999 - 100000) + 100000);
+            classifyMapper.addClassify(new Classify(classifyKey, classify));
+        }
 
         Map<String, Object> map = new HashMap<>();
-        map.put("pictureKey", 3);
-        map.put("name", "3");
-        map.put("imgUrl", "3");
+        map.put("name", "DetectLabel1.jpg");
+        map.put("imgUrl", "http://49.234.149.121:8080/image/762736/DetectLabel1.jpg");
+        map.put("thumbUrl", "http://49.234.149.121:8080/image/762736/thumb/DetectLabel1.jpg");
         map.put("date", new Date());
-        map.put("size", 3);
-        map.put("classify", 3);
-        map.put("userKey", 3);
-
+        map.put("size", 1);
+        map.put("classifyKey", classifyKey);
+        map.put("userKey", 306205);
     }
 
     public void testDeletePictures() {
@@ -49,13 +61,12 @@ public class PictureServiceImplTest extends TestCase {
         list.add("1.jpg");
         list.add("5.jpg");
 
-        System.out.println(pictureService.deletePicture(list, 1));
     }
 
     public void testCheckRepeat() {
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("applicationContext.xml");
         PictureService pictureService = applicationContext.getBean("pictureServiceImpl", PictureService.class);
 
-        System.out.println(pictureService.checkRepeat("2.jpg", 1));
+        System.out.println(pictureService.checkRepeat("qwfraw.jpg", 306205));
     }
 }

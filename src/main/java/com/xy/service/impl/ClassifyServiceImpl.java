@@ -26,7 +26,7 @@ public class ClassifyServiceImpl implements ClassifyService {
         try {
             return classifyMapper.queryClassifyKey(classify);
         } catch (BindingException bindingException) {
-            return -1;
+            return 0;
         }
     }
 }
