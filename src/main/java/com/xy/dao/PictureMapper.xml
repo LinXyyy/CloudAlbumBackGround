@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xy.dao.PictureMapper">
+
+    <resultMap id="pictureInClassify" type="picture">
+        <result property="pictureKey" column="pictureKey"/>
+        <result property="name" column="name"/>
+        <result property="imgUrl" column="imgUrl"/>
+        <result property="date" column="date"/>
+        <result property="size" column="size"/>
+        <result property="userKey" column="userKey"/>
+        <association property="classify" javaType="classify">
+            <result property="classify" column="classify"/>
+            <result property="classifyKey" column="classifyKey"/>
+        </association>
+    </resultMap>
+
+    <parameterMap id="classifyInPictureToInt" type="picture">
+
+    </parameterMap>
+
+    <select id="queryName" resultType="string">
+        select name
+        from picture
+        where name like #{ checkName } and userKey = #{ userKey }
+    </select>
+
+    <select id="getPictureByUserKey" resultMap="pictureInClassify">
+        select *
+        from picture p,classify c
+        where p.classifyKey = c.classifyKey and p.userKey = #{ userKey }
+    </select>
+
+    <select id="getPictureByUserKeyAndClassify" resultMap="pictureInClassify">
+        select *
+        from picture p,classify c
+        where p.classifyKey = c.classifyKey and p.userKey = #{ userKey } and c.classifyKey = #{ classifyKey }
+    </select>
+
+    <insert id="addPicture" parameterType="map">
+        insert into picture (name, imgUrl, thumbUrl,date, size, classifyKey, userKey)
+        values (#{name}, #{imgUrl}, #{thumbUrl}, #{date}, #{size}, #{classifyKey}, #{userKey});
+    </insert>
+
+    <delete id="deletePicture">
+        delete from picture
+        where name = #{name} and userKey = #{userKey}
+    </delete>
+</mapper>

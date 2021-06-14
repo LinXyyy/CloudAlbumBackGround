@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xy.dao.UserMapper">
+    <select id="queryUserByAccount" resultType="user">
+        select * from user where account = #{ account }
+    </select>
+
+    <insert id="addUser" parameterType="user">
+        insert into user (userKey, account, password)
+        values (#{userKey}, #{account}, #{password})
+    </insert>
+</mapper>
