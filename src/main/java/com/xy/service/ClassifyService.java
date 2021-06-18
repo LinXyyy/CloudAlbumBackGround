@@ -3,6 +3,8 @@ package com.xy.service;
 import com.xy.pojo.Classify;
 import org.apache.ibatis.binding.BindingException;
 
+import java.util.Map;
+
 /**
  * @author x1yyy
  */
@@ -22,4 +24,11 @@ public interface ClassifyService {
      * @return key
      */
     int queryClassifyKey(String classify) throws BindingException;
+
+    /**
+     * 查询指定用户下所有的分类
+     * @param userKey 指定用户
+     * @return 结果
+     */
+    Map<String, Object> queryAllClassify(String userKey);
 }

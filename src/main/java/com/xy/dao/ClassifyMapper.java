@@ -3,6 +3,8 @@ package com.xy.dao;
 import com.xy.pojo.Classify;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 /**
  * @author x1yyy
  */
@@ -21,4 +23,11 @@ public interface ClassifyMapper {
      * @return key
      */
     int queryClassifyKey(@Param("classify") String classify);
+
+    /**
+     * 查询指定用户下所有的分类
+     * @param userKey 指定用户
+     * @return 结果
+     */
+    List<Classify> queryAllClassify(@Param("userKey") String userKey);
 }

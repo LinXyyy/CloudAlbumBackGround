@@ -42,8 +42,8 @@
 
     <select id="getPictureByUserKeyAndFaceKey" resultMap="pictureInClassify">
         select *
-        from picture
-        where faceKey = #{ faceKey } and userKey = #{ userKey }
+        from picture p, classify c
+        where p.faceKey = #{ faceKey } and p.userKey = #{ userKey } and p.classifyKey = c.classifyKey
     </select>
 
     <insert id="addPicture" parameterType="map">

@@ -1,6 +1,5 @@
 package com.xy.controller;
 
-import com.xy.pojo.Picture;
 import com.xy.service.PictureService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -8,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -22,19 +20,19 @@ public class PictureController {
 
     @ResponseBody
     @RequestMapping("/getPictureByUserKey")
-    public List<Picture> getPictureByUserKey(@RequestHeader String userKey) {
+    public Map<String, Object> getPictureByUserKey(@RequestHeader String userKey) {
         return pictureService.getPictureByUserKey(Integer.parseInt(userKey));
     }
 
     @ResponseBody
     @RequestMapping("/getPictureByUserKeyAndClassify")
-    public List<Picture> getPictureByUserKeyAndClassify(String classifyKey, @RequestHeader String userKey) {
+    public Map<String, Object> getPictureByUserKeyAndClassify(String classifyKey, @RequestHeader String userKey) {
         return pictureService.getPictureByUserKeyAndClassify(Integer.parseInt(userKey), Integer.parseInt(classifyKey));
     }
 
     @ResponseBody
     @RequestMapping("/addPicture")
-    public Map<String, Integer> addPicture(MultipartFile[] img, HttpServletRequest request) {
+    public Map<String, Map<String, Object>> addPicture(MultipartFile[] img, HttpServletRequest request) {
         int userKey = Integer.parseInt(request.getHeader("userKey"));
 
         String imgUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + "/image/"+ userKey + "/";
@@ -45,8 +43,8 @@ public class PictureController {
 
     @ResponseBody
     @RequestMapping("/deletePicture")
-    public Map<String, Integer> deletePicture(String[] pictureNames, @RequestHeader String userKey) {
-        return pictureService.deletePicture(pictureNames, Integer.parseInt(userKey));
+    public Map<String, Map<String, Object>> deletePicture(String[] pictureName, @RequestHeader String userKey) {
+        return pictureService.deletePicture(pictureName, Integer.parseInt(userKey));
     }
 
     @ResponseBody

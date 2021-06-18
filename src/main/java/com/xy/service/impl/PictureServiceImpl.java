@@ -13,6 +13,7 @@ import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
@@ -26,6 +27,7 @@ import java.util.concurrent.Executors;
  * @author x1yyy
  */
 @Service
+@Transactional
 @SuppressWarnings("all")
 public class PictureServiceImpl implements PictureService {
 
@@ -35,23 +37,40 @@ public class PictureServiceImpl implements PictureService {
     private ClassifyService classifyService;
 
     @Override
-    public List<Picture> getPictureByUserKey(int userKey) {
-        return pictureMapper.getPictureByUserKey(userKey);
-    }
-
-    @Override
-    public List<Picture> getPictureByUserKeyAndClassify(int userKey, int classifyKey) {
-        return pictureMapper.getPictureByUserKeyAndClassify(userKey, classifyKey);
-    }
-
-    @Override
-    public Map<String, Integer> addPicture(MultipartFile[] img, int userKey, String imgUrl, String thumbUrl) {
-        Map<String, Integer> results = new HashMap<>();
-
+    public Map<String, Object> getPictureByUserKey(int userKey) {
         Map<String, Object> map = new HashMap<>();
 
-        CountDownLatch countDownLatch = new CountDownLatch(img.length);
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        List<Picture> pictures = pictureMapper.getPictureByUserKey(userKey);
+
+        if (pictures.size() == 0) {
+            map.put("resultCode", 1);
+            map.put("resultMessage","photo album is empty");
+            map.put("data", null);
+        } else {
+            map.put("resultCode", 0);
+            map.put("resultMessage","success");
+            map.put("data", pictures);
+        }
+
+        return map;
+    }
+
+    @Override
+    public Map<String, Object> getPictureByUserKeyAndClassify(int userKey, int classifyKey) {
+        Map<String, Object> map = new HashMap<>();
+
+        map.put("resultCode", 0);
+        map.put("resultMessage","success");
+        map.put("data", pictureMapper.getPictureByUserKeyAndClassify(userKey, classifyKey));
+
+        return map;
+    }
+
+    @Override
+    public Map<String, Map<String, Object>> addPicture(MultipartFile[] img, int userKey, String imgUrl, String thumbUrl) {
+
+        Map<String, Map<String, Object>> results = new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
 
         String path = "/www/CloudAlbum/" + userKey + "/";
         String thumbPath = path + "thumb/";
@@ -65,6 +84,9 @@ public class PictureServiceImpl implements PictureService {
         if (!thumbFolder.exists()) {
             Boolean bool = thumbFolder.mkdirs();
         }
+
+        CountDownLatch countDownLatch = new CountDownLatch(img.length);
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
 
         for (MultipartFile file : img) {
 
@@ -94,7 +116,7 @@ public class PictureServiceImpl implements PictureService {
 
                     if (classifyKey == 0) {
                         classifyKey = (int) (Math.random() * (999999 - 100000) + 100000);
-                        classifyService.addClassify(new Classify(classifyKey, classify));
+                        classifyService.addClassify(new Classify(classifyKey, classify, userKey));
                     }
 
                     map.put("name", name);
@@ -106,9 +128,28 @@ public class PictureServiceImpl implements PictureService {
                     map.put("faceKey", faceKey);
                     map.put("userKey", userKey);
 
-                    results.put(oldName, pictureMapper.addPicture(map));
-                } catch (Exception e) {
-                    results.put(oldName, -1);
+                    Map<String, Object> result = new HashMap<>();
+
+                    if (pictureMapper.addPicture(map) == 1) {
+                        if (oldName.equals(name)) {
+                            result.put("resultCode", 0);
+                            result.put("resultMessage", "success");
+                            results.put(name, result);
+                        } else {
+                            result.put("resultCode", 1);
+                            result.put("resultMessage", "rewrite picture name to " + name);
+                            results.put(name, result);
+                        }
+                    } else {
+                        result.put("resultCode", 3);
+                        result.put("resultMessage", "database write failed");
+                        results.put(name, result);
+                    }
+                } catch (IOException ioException) {
+                    Map<String, Object> result = new HashMap<>();
+                    result.put("resultCode", 2);
+                    result.put("resultMessage", "file write failed");
+                    results.put(name, result);
                 } finally {
                     countDownLatch.countDown();
                 }
@@ -128,9 +169,12 @@ public class PictureServiceImpl implements PictureService {
         return results;
     }
 
+/*
+* 存在优化问题：删除本地文件与删除数据库文件的先后顺序，如果delete存在这个问题，那么add也会存在这个问题
+* */
     @Override
-    public Map<String, Integer> deletePicture(String[] pictureNames, int userKey) {
-        Map<String, Integer> map = new HashMap<>();
+    public Map<String, Map<String, Object>> deletePicture(String[] pictureNames, int userKey) {
+        Map<String, Map<String, Object>> results = new HashMap<>();
 
         CountDownLatch countDownLatch = new CountDownLatch(pictureNames.length);
         ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -146,20 +190,25 @@ public class PictureServiceImpl implements PictureService {
                     String thumbPath = "/www/CloudAlbum/" + userKey + "/thumb/" + name;
                     File thumbFile = new File(thumbPath);
 
-                    file.delete();
-                    thumbFile.delete();
+                    Map<String, Object> result = new HashMap<>();
 
-                    try {
-                        if (file.delete() && thumbFile.delete() && pictureMapper.deletePicture(name, userKey) == 1) {
-                            map.put(name, 1);
-                        } else {
-                            map.put(name, -1);
-                        }
-                    } catch (Exception e) {
-                        map.put(name, -1);
-                    } finally {
-                        countDownLatch.countDown();
+                    if (!file.delete() || !thumbFile.delete()) {
+                        result.put("resultCode", 2);
+                        result.put("resultMessage", "file delete failed");
+                        results.put(name, result);
                     }
+                    else if (pictureMapper.deletePicture(name, userKey) != 1) {
+                        result.put("resultCode", 1);
+                        result.put("resultMessage", "database delete failed");
+                        results.put(name, result);
+                    }
+                    else {
+                        result.put("resultCode", 0);
+                        result.put("resultMessage", "success");
+                        results.put(name, result);
+                    }
+
+                    countDownLatch.countDown();
                 }
             };
 
@@ -174,7 +223,7 @@ public class PictureServiceImpl implements PictureService {
 
         executorService.shutdown();
 
-        return map;
+        return results;
     }
 
     @Override
@@ -233,16 +282,26 @@ public class PictureServiceImpl implements PictureService {
             /*Baidu*/
             String faceKey = new FaceUtil().query(file.getPath());
 
-            map.put("resultCode", 1);
-            map.put("result", "查询成功");
-            map.put("pictures", pictureMapper.getPictureByUserKeyAndFaceKey(faceKey, Integer.parseInt(userKey)));
+            List<Picture> pictures = pictureMapper.getPictureByUserKeyAndFaceKey(faceKey, Integer.parseInt(userKey));
+
+            if (pictures.size() <= 0) {
+                map.put("resultCode", 1);
+                map.put("resultMessage", "no match face in album");
+                map.put("date", null);
+            } else {
+                map.put("resultCode", 0);
+                map.put("resultMessage", "success");
+                map.put("date", pictures);
+            }
+
             file.delete();
             return map;
         }
 
         file.delete();
-        map.put("resultCode", -1);
-        map.put("result", "图片未检测到人脸");
+        map.put("resultCode", 2);
+        map.put("resultMessage", "picture not find face");
+        map.put("data", null);
         return map;
     }
 }

@@ -18,7 +18,7 @@ public interface PictureService {
      * @param userKey 用户主键
      * @return 查询到照片的列表
      */
-    List<Picture> getPictureByUserKey(int userKey);
+    Map<String, Object> getPictureByUserKey(int userKey);
 
     /**
      * 根据用户主键以及所属分类查询照片
@@ -27,7 +27,7 @@ public interface PictureService {
      * @param classifyKey 所属分类
      * @return 查询到照片的列表
      */
-    List<Picture> getPictureByUserKeyAndClassify(int userKey, int classifyKey);
+    Map<String, Object> getPictureByUserKeyAndClassify(int userKey, int classifyKey);
 
     /**
      * 添加照片
@@ -38,7 +38,7 @@ public interface PictureService {
      * @param thumbUrl 缩略图路径
      * @return 添加是否成功
      */
-    Map<String, Integer> addPicture(MultipartFile[] img, int userKey, String imgUrl, String thumbUrl);
+    Map<String, Map<String, Object>> addPicture(MultipartFile[] img, int userKey, String imgUrl, String thumbUrl);
 
     /**
      * 删除照片
@@ -47,7 +47,7 @@ public interface PictureService {
      * @param userKey 用户主键
      * @return 是否删除
      */
-    Map<String, Integer> deletePicture(String[] pictureName, int userKey);
+    Map<String, Map<String, Object>> deletePicture(String[] pictureName, int userKey);
 
     /**
      * 查询所查照片名是否存在

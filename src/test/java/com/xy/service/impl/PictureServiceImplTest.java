@@ -24,9 +24,7 @@ public class PictureServiceImplTest extends TestCase {
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("applicationContext.xml");
         PictureService pictureService = applicationContext.getBean("pictureServiceImpl", PictureService.class);
 
-        for (Picture picture : pictureService.getPictureByUserKeyAndClassify(1, 1)) {
-            System.out.println(picture);
-        }
+        pictureService.getPictureByUserKeyAndClassify(762736, 0);
     }
 
     public void testAddPictures() {
@@ -40,7 +38,7 @@ public class PictureServiceImplTest extends TestCase {
 
         if (classifyKey == -1) {
             classifyKey = (int) (Math.random() * (999999 - 100000) + 100000);
-            classifyMapper.addClassify(new Classify(classifyKey, classify));
+            classifyMapper.addClassify(new Classify(classifyKey, classify, 1));
         }
 
         Map<String, Object> map = new HashMap<>();
@@ -57,9 +55,8 @@ public class PictureServiceImplTest extends TestCase {
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("applicationContext.xml");
         PictureService pictureService = applicationContext.getBean("pictureServiceImpl", PictureService.class);
 
-        List<String> list = new ArrayList<>();
-        list.add("1.jpg");
-        list.add("5.jpg");
+        String[] strings = {"1"};
+        System.out.println(pictureService.deletePicture(strings, 1));
 
     }
 

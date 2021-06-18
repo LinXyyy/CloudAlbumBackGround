@@ -14,4 +14,5 @@ import lombok.NoArgsConstructor;
 public class Classify {
     private int classifyKey;
     private String classify;
+    private int userKey;
 }

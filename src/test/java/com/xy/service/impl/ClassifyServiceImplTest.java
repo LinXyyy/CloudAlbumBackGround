@@ -12,7 +12,7 @@ public class ClassifyServiceImplTest extends TestCase {
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("applicationContext.xml");
         ClassifyService classifyService = applicationContext.getBean("classifyServiceImpl", ClassifyService.class);
 
-        System.out.println(classifyService.addClassify(new Classify(111, "111")));
+        System.out.println(classifyService.addClassify(new Classify(111, "111", 1)));
     }
 
     public void testQueryClassifyKey() {

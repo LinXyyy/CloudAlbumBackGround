@@ -5,12 +5,18 @@
 
 <mapper namespace="com.xy.dao.ClassifyMapper">
     <insert id="addClassify" parameterType="classify">
-        insert into classify (classifyKey, classify)
-        values (#{ classifyKey }, #{ classify });
+        insert into classify (classifyKey, classify, userKey)
+        values (#{ classifyKey }, #{ classify }, #{ userKey });
     </insert>
     
     <select id="queryClassifyKey" resultType="_int">
         select classifyKey
         from classify where classify = #{classify};
+    </select>
+
+    <select id="queryAllClassify" resultType="classify">
+        select *
+        from classify
+        where userKey = #{ userKey }
     </select>
 </mapper>
