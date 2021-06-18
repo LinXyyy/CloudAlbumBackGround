@@ -20,5 +20,6 @@ public class Picture {
     private Date date;
     private double size;
     private Classify classify;
+    private String faceKey;
     private int userKey;
 }

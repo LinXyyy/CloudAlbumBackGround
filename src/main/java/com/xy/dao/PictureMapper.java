@@ -54,4 +54,14 @@ public interface PictureMapper {
      * @return 查询结果
      */
     String queryName(@Param("checkName") String checkName, @Param("userKey") int userKey);
+
+    /**
+     *
+     * 根据人脸获取与人脸相似的照片
+     *
+     * @param faceKey 人脸标识符
+     * @param userKey 用户
+     * @return 结果
+     */
+    List<Picture> getPictureByUserKeyAndFaceKey(@Param("faceKey") String faceKey, @Param("userKey") int userKey);
 }

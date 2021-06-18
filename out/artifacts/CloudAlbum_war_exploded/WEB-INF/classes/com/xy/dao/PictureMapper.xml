@@ -9,18 +9,16 @@
         <result property="pictureKey" column="pictureKey"/>
         <result property="name" column="name"/>
         <result property="imgUrl" column="imgUrl"/>
+        <result property="thumbUrl" column="thumbUrl"/>
         <result property="date" column="date"/>
         <result property="size" column="size"/>
         <result property="userKey" column="userKey"/>
+        <result property="faceKey" column="faceKey"/>
         <association property="classify" javaType="classify">
             <result property="classify" column="classify"/>
             <result property="classifyKey" column="classifyKey"/>
         </association>
     </resultMap>
-
-    <parameterMap id="classifyInPictureToInt" type="picture">
-
-    </parameterMap>
 
     <select id="queryName" resultType="string">
         select name
@@ -42,9 +40,15 @@
         where p.classifyKey = c.classifyKey and p.userKey = #{ userKey } and c.classifyKey = #{ classifyKey }
     </select>
 
+    <select id="getPictureByUserKeyAndFaceKey" resultMap="pictureInClassify">
+        select *
+        from picture
+        where faceKey = #{ faceKey } and userKey = #{ userKey }
+    </select>
+
     <insert id="addPicture" parameterType="map">
-        insert into picture (name, imgUrl, thumbUrl,date, size, classifyKey, userKey)
-        values (#{name}, #{imgUrl}, #{thumbUrl}, #{date}, #{size}, #{classifyKey}, #{userKey});
+        insert into picture (name, imgUrl, thumbUrl,date, size, classifyKey, faceKey, userKey)
+        values (#{name}, #{imgUrl}, #{thumbUrl}, #{date}, #{size}, #{classifyKey}, #{faceKey}, #{userKey});
     </insert>
 
     <delete id="deletePicture">

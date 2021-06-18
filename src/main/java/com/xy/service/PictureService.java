@@ -57,4 +57,13 @@ public interface PictureService {
      * @return 查询结果
      */
     String checkRepeat(String name, int userKey);
+
+    /**
+     * 人脸检索
+     * 用户上传一张人脸照片,查询该人脸的所有照片
+     * @param img 上传的人脸照片
+     * @param userKey 照片所属用户
+     * @return 查询结果
+     */
+    Map<String, Object> faceRetrieval(MultipartFile img, String userKey);
 }

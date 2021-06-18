@@ -5,13 +5,17 @@ import com.xy.pojo.Classify;
 import com.xy.pojo.Picture;
 import com.xy.service.ClassifyService;
 import com.xy.service.PictureService;
+import com.xy.utils.Base64Util;
 import com.xy.utils.ClassifyUtil;
+import com.xy.utils.FaceUtil;
+import com.xy.utils.FileUtil;
 import net.coobird.thumbnailator.Thumbnails;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
@@ -68,6 +72,7 @@ public class PictureServiceImpl implements PictureService {
                 // 照片信息
                 String name = new String(Objects.requireNonNull(file.getOriginalFilename()).getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
                 String oldName = name;
+                String faceKey = null;
                 name = checkRepeat(name, userKey);
 
                 double size = Double.parseDouble(String.valueOf(file.getSize()));
@@ -78,6 +83,12 @@ public class PictureServiceImpl implements PictureService {
                     Thumbnails.of(new File(path + name)).scale(1F).outputQuality(0.3F).toFile(new File(thumbPath + name));
 
                     String classify = ClassifyUtil.getClassify(thumbUrl + name);
+
+                    if (classify.indexOf("人") != -1) {
+                        FaceUtil faceUtil = new FaceUtil();
+                        faceKey = faceUtil.query(path + name);
+                        faceUtil.add(path + name, faceKey);
+                    }
 
                     int classifyKey = classifyService.queryClassifyKey(classify);
 
@@ -92,6 +103,7 @@ public class PictureServiceImpl implements PictureService {
                     map.put("date", new Date());
                     map.put("size", size);
                     map.put("classifyKey", classifyKey);
+                    map.put("faceKey", faceKey);
                     map.put("userKey", userKey);
 
                     results.put(oldName, pictureMapper.addPicture(map));
@@ -120,10 +132,48 @@ public class PictureServiceImpl implements PictureService {
     public Map<String, Integer> deletePicture(String[] pictureNames, int userKey) {
         Map<String, Integer> map = new HashMap<>();
 
+        CountDownLatch countDownLatch = new CountDownLatch(pictureNames.length);
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+
         for (String name : pictureNames) {
-            map.put(name, pictureMapper.deletePicture(name, userKey));
+
+            Runnable runnable = new Runnable() {
+                @Override
+                public void run() {
+                    String path = "/www/CloudAlbum/" + userKey + "/" + name;
+                    File file = new File(path);
+
+                    String thumbPath = "/www/CloudAlbum/" + userKey + "/thumb/" + name;
+                    File thumbFile = new File(thumbPath);
+
+                    file.delete();
+                    thumbFile.delete();
+
+                    try {
+                        if (file.delete() && thumbFile.delete() && pictureMapper.deletePicture(name, userKey) == 1) {
+                            map.put(name, 1);
+                        } else {
+                            map.put(name, -1);
+                        }
+                    } catch (Exception e) {
+                        map.put(name, -1);
+                    } finally {
+                        countDownLatch.countDown();
+                    }
+                }
+            };
+
+            executorService.execute(runnable);
         }
-        
+
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        executorService.shutdown();
+
         return map;
     }
 
@@ -160,5 +210,39 @@ public class PictureServiceImpl implements PictureService {
             }
         }
         return name;
+    }
+
+    @Override
+    public Map<String, Object> faceRetrieval(MultipartFile img, String userKey) {
+        Map<String, Object> map = new HashMap<>();
+
+        String name = img.getOriginalFilename();
+
+        File file = new File("/www/CloudAlbum", name);
+
+        try {
+            FileUtils.copyInputStreamToFile(img.getInputStream(), file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        /*Tencent*/
+        String classify = ClassifyUtil.getClassify(file);
+
+        if (classify.indexOf("人") != -1) {
+            /*Baidu*/
+            String faceKey = new FaceUtil().query(file.getPath());
+
+            map.put("resultCode", 1);
+            map.put("result", "查询成功");
+            map.put("pictures", pictureMapper.getPictureByUserKeyAndFaceKey(faceKey, Integer.parseInt(userKey)));
+            file.delete();
+            return map;
+        }
+
+        file.delete();
+        map.put("resultCode", -1);
+        map.put("result", "图片未检测到人脸");
+        return map;
     }
 }

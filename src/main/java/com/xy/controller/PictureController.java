@@ -48,4 +48,10 @@ public class PictureController {
     public Map<String, Integer> deletePicture(String[] pictureNames, @RequestHeader String userKey) {
         return pictureService.deletePicture(pictureNames, Integer.parseInt(userKey));
     }
+
+    @ResponseBody
+    @RequestMapping("/faceRetrieval")
+    public Map<String, Object> faceRetrieval(MultipartFile img, @RequestHeader String userKey) {
+        return pictureService.faceRetrieval(img, userKey);
+    }
 }

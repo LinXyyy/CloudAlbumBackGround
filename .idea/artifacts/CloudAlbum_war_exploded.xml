@@ -58,6 +58,7 @@
           <element id="library" level="project" name="Maven: org.springframework:spring-tx:5.3.8" />
           <element id="library" level="project" name="Maven: org.springframework:spring-web:5.3.8" />
           <element id="library" level="project" name="Maven: org.springframework:spring-webmvc:5.3.8" />
+          <element id="library" level="project" name="Maven: org.json:json:20140107" />
         </element>
       </element>
     </root>
