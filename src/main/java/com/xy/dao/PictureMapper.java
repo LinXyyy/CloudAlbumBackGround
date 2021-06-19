@@ -64,4 +64,18 @@ public interface PictureMapper {
      * @return 结果
      */
     List<Picture> getPictureByUserKeyAndFaceKey(@Param("faceKey") String faceKey, @Param("userKey") int userKey);
+
+    /**
+     * 根据当前月，日获得数据
+     * @param userKey 用户
+     * @return 照片结果集
+     */
+    List<Picture> getPictureByUserKeyAndNowTime(@Param("userKey") int userKey);
+
+    /**
+     * 获得风景照片
+     * @param userKey 用户
+     * @return 照片结果集
+     */
+    List<Picture> getPictureByUserKeyAndScenery(@Param("userKey") int userKey, @Param("classify") String classify);
 }

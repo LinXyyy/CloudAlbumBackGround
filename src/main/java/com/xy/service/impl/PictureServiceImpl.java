@@ -27,14 +27,19 @@ import java.util.concurrent.Executors;
  * @author x1yyy
  */
 @Service
-@Transactional
 @SuppressWarnings("all")
 public class PictureServiceImpl implements PictureService {
 
-    @Autowired
     private PictureMapper pictureMapper;
-    @Autowired
     private ClassifyService classifyService;
+    private FaceUtil faceUtil;
+
+    @Autowired
+    public PictureServiceImpl(PictureMapper pictureMapper, ClassifyService classifyService, FaceUtil faceUtil) {
+        this.pictureMapper = pictureMapper;
+        this.classifyService = classifyService;
+        this.faceUtil = faceUtil;
+    }
 
     @Override
     public Map<String, Object> getPictureByUserKey(int userKey) {
@@ -107,7 +112,6 @@ public class PictureServiceImpl implements PictureService {
                     String classify = ClassifyUtil.getClassify(thumbUrl + name);
 
                     if (classify.indexOf("人") != -1) {
-                        FaceUtil faceUtil = new FaceUtil();
                         faceKey = faceUtil.query(path + name);
                         faceUtil.add(path + name, faceKey);
                     }
@@ -133,23 +137,27 @@ public class PictureServiceImpl implements PictureService {
                     if (pictureMapper.addPicture(map) == 1) {
                         if (oldName.equals(name)) {
                             result.put("resultCode", 0);
+                            result.put("name", oldName);
                             result.put("resultMessage", "success");
                             results.put(name, result);
                         } else {
+                            result.put("name", oldName);
                             result.put("resultCode", 1);
                             result.put("resultMessage", "rewrite picture name to " + name);
                             results.put(name, result);
                         }
                     } else {
+                        result.put("name", oldName);
                         result.put("resultCode", 3);
                         result.put("resultMessage", "database write failed");
                         results.put(name, result);
                     }
                 } catch (IOException ioException) {
                     Map<String, Object> result = new HashMap<>();
+                    result.put("name", oldName);
                     result.put("resultCode", 2);
                     result.put("resultMessage", "file write failed");
-                    results.put(name, result);
+                    results.put(oldName, result);
                 } finally {
                     countDownLatch.countDown();
                 }
@@ -173,10 +181,10 @@ public class PictureServiceImpl implements PictureService {
 * 存在优化问题：删除本地文件与删除数据库文件的先后顺序，如果delete存在这个问题，那么add也会存在这个问题
 * */
     @Override
-    public Map<String, Map<String, Object>> deletePicture(String[] pictureNames, int userKey) {
+    public Map<String, Map<String, Object>> deletePicture(List<String> pictureNames, int userKey) {
         Map<String, Map<String, Object>> results = new HashMap<>();
 
-        CountDownLatch countDownLatch = new CountDownLatch(pictureNames.length);
+        CountDownLatch countDownLatch = new CountDownLatch(pictureNames.size());
         ExecutorService executorService = Executors.newSingleThreadExecutor();
 
         for (String name : pictureNames) {
@@ -193,16 +201,19 @@ public class PictureServiceImpl implements PictureService {
                     Map<String, Object> result = new HashMap<>();
 
                     if (!file.delete() || !thumbFile.delete()) {
+                        result.put("name", name);
                         result.put("resultCode", 2);
                         result.put("resultMessage", "file delete failed");
                         results.put(name, result);
                     }
                     else if (pictureMapper.deletePicture(name, userKey) != 1) {
+                        result.put("name", name);
                         result.put("resultCode", 1);
                         result.put("resultMessage", "database delete failed");
                         results.put(name, result);
                     }
                     else {
+                        result.put("name", name);
                         result.put("resultCode", 0);
                         result.put("resultMessage", "success");
                         results.put(name, result);
@@ -280,7 +291,7 @@ public class PictureServiceImpl implements PictureService {
 
         if (classify.indexOf("人") != -1) {
             /*Baidu*/
-            String faceKey = new FaceUtil().query(file.getPath());
+            String faceKey = faceUtil.query(file.getPath());
 
             List<Picture> pictures = pictureMapper.getPictureByUserKeyAndFaceKey(faceKey, Integer.parseInt(userKey));
 

@@ -17,6 +17,7 @@
         <association property="classify" javaType="classify">
             <result property="classify" column="classify"/>
             <result property="classifyKey" column="classifyKey"/>
+            <result property="userKey" column="userKey"/>
         </association>
     </resultMap>
 
@@ -55,4 +56,16 @@
         delete from picture
         where name = #{name} and userKey = #{userKey}
     </delete>
+
+    <select id="getPictureByUserKeyAndNowTime" resultMap="pictureInClassify">
+        select *
+        from picture p, classify c
+        where p.userKey = #{ userKey } and MONTH(date) = MONTH(CURDATE()) and DAY(date) = DAY(CURDATE()) and YEAR(date) != YEAR(CURDATE())
+    </select>
+
+    <select id="getPictureByUserKeyAndScenery" resultMap="pictureInClassify">
+        select *
+        from picture p, classify c
+        where c.classify = #{ classify } and c.classifyKey = p.classifyKey and p.userKey = #{ userKey }
+    </select>
 </mapper>

@@ -55,8 +55,8 @@ public class PictureServiceImplTest extends TestCase {
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("applicationContext.xml");
         PictureService pictureService = applicationContext.getBean("pictureServiceImpl", PictureService.class);
 
-        String[] strings = {"1"};
-        System.out.println(pictureService.deletePicture(strings, 1));
+//        String[] strings = {"1"};
+//        System.out.println(pictureService.deletePicture(strings, 1));
 
     }
 

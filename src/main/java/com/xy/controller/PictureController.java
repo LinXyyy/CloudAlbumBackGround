@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -43,8 +44,9 @@ public class PictureController {
 
     @ResponseBody
     @RequestMapping("/deletePicture")
-    public Map<String, Map<String, Object>> deletePicture(String[] pictureName, @RequestHeader String userKey) {
-        return pictureService.deletePicture(pictureName, Integer.parseInt(userKey));
+    public Map<String, Map<String, Object>> deletePicture(@RequestBody Map<String, List<String>> pictureName, @RequestHeader String userKey) {
+        List<String> list = pictureName.get("pictureName");
+        return pictureService.deletePicture(list, Integer.parseInt(userKey));
     }
 
     @ResponseBody

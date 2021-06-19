@@ -22,4 +22,5 @@ public class Picture {
     private Classify classify;
     private String faceKey;
     private int userKey;
+    private int momentKey;
 }

@@ -51,7 +51,7 @@ public class ClassifyUtil {
             String classify = "";
             for (int i = 0; i < length; i++) {
                 if (!"其他".equals(response.getLabels()[i].getFirstCategory())) {
-                    classify = Objects.requireNonNull(response).getLabels()[i].getName();
+                    classify = Objects.requireNonNull(response).getLabels()[i].getSecondCategory();
                     break;
                 }
             }
