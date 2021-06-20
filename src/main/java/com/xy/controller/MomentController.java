@@ -25,4 +25,10 @@ public class MomentController {
     public Map<String, Object> createMoment(@RequestHeader String userKey) {
         return momentService.createMoment(userKey);
     }
+
+    @ResponseBody
+    @RequestMapping("/saveMoment")
+    public Map<String, Object> saveMoment(String id,@RequestHeader String userKey) {
+        return momentService.saveMoment(id, userKey);
+    }
 }

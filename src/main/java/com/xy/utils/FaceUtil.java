@@ -2,7 +2,7 @@ package com.xy.utils;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +11,7 @@ import java.util.UUID;
 /**
  * @author x1yyy
  */
-@Controller
+@Component
 public class FaceUtil {
 
     /**
@@ -95,7 +95,6 @@ public class FaceUtil {
      *     }
      * }
      */
-
     public int add(String imgPath, String faceKey) {
         String url = "https://aip.baidubce.com/rest/2.0/face/v3/faceset/user/add";
 
@@ -118,4 +117,30 @@ public class FaceUtil {
         return -1;
     }
 
+    public int faceDetect(String imgPath) {
+        String url = "https://aip.baidubce.com/rest/2.0/face/v3/detect";
+        try {
+            Map<String, Object> map = new HashMap<>();
+            map.put("image", Base64Util.getBase64Code(imgPath));
+            map.put("image_type", "BASE64");
+            map.put("max_face_num", 120);
+
+            String param = GsonUtils.toJson(map);
+
+            String accessToken = FaceTokenUtil.getAuth();
+
+            String result = HttpUtil.post(url, accessToken, "application/json", param);
+
+            JSONObject jsonObject = JSON.parseObject(result);
+
+            if (Integer.parseInt(jsonObject.getString("error_code")) == 0) {
+                JSONObject result1 = jsonObject.getJSONObject("result");
+                return (int) result1.get("face_num");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
 }

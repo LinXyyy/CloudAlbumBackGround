@@ -1,0 +1,9 @@
+[2021-06-20 12:49:20][INFO][com.xy.utils.LogUtil] Class: com.xy.controller.PictureController  --- Method:  getPictureByUserKey  ---- Start ----  
+[2021-06-20 12:49:20][INFO][com.xy.utils.LogUtil] Class: com.xy.service.impl.PictureServiceImpl  --- Method:  getPictureByUserKey  ---- Start ----  
+[2021-06-20 12:49:20][INFO][com.xy.utils.LogUtil] Class: com.sun.proxy.$Proxy34  --- Method:  getPictureByUserKey  ---- Start ----  
+[2021-06-20 12:49:22][DEBUG][com.xy.dao.PictureMapper.getPictureByUserKey] ==>  Preparing: select * from picture p,classify c where p.classifyKey = c.classifyKey and p.userKey = ?
+[2021-06-20 12:49:22][DEBUG][com.xy.dao.PictureMapper.getPictureByUserKey] ==> Parameters: 577421(Integer)
+[2021-06-20 12:49:22][DEBUG][com.xy.dao.PictureMapper.getPictureByUserKey] <==      Total: 23
+[2021-06-20 12:49:22][INFO][com.xy.utils.LogUtil] Class: com.sun.proxy.$Proxy34  --- Method:  getPictureByUserKey  ---- End ----  
+[2021-06-20 12:49:22][INFO][com.xy.utils.LogUtil] Class: com.xy.service.impl.PictureServiceImpl  --- Method:  getPictureByUserKey  ---- End ----  
+[2021-06-20 12:49:22][INFO][com.xy.utils.LogUtil] Class: com.xy.controller.PictureController  --- Method:  getPictureByUserKey  ---- End ----  

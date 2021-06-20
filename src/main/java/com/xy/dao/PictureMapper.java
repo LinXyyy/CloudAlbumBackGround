@@ -75,7 +75,10 @@ public interface PictureMapper {
     /**
      * 获得风景照片
      * @param userKey 用户
+     * @param classify classify为确定的值 = “自然风光"
      * @return 照片结果集
      */
     List<Picture> getPictureByUserKeyAndScenery(@Param("userKey") int userKey, @Param("classify") String classify);
+
+
 }

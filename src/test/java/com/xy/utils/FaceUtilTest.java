@@ -30,4 +30,9 @@ public class FaceUtilTest {
     public void testQuery() {
         System.out.println(faceUtil.query("C:\\Users\\x1yyy\\Pictures\\Camera Roll\\ycy.jpg"));
     }
+
+    @Test
+    public void testFaceDetect() {
+        System.out.println(faceUtil.faceDetect("C:\\Users\\x1yyy\\Pictures\\Camera Roll\\ada.jpg"));
+    }
 }

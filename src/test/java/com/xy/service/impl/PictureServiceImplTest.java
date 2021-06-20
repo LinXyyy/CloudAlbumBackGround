@@ -17,7 +17,7 @@ public class PictureServiceImplTest extends TestCase {
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("applicationContext.xml");
         PictureService pictureService = applicationContext.getBean("pictureServiceImpl", PictureService.class);
 
-        System.out.println(pictureService.getPictureByUserKey(0));
+        System.out.println(pictureService.getPictureByUserKey(577421));
     }
 
     public void testGetPictureByUserKeyAndClassify() {
